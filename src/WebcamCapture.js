@@ -8,7 +8,7 @@ const videoConstraints = {
   facingMode: "user",
 };
 
-export const WebcamCapture = ({ numSegments = 6 }) => {
+export const WebcamCapture = ({ numSegments = 6, useSplitSegments = true }) => {
   const canvasRef = React.useRef(null);
   const webcamRef = React.useRef(null);
   useAnimationFrame(() => grabFrame());
@@ -19,7 +19,11 @@ export const WebcamCapture = ({ numSegments = 6 }) => {
     const screenCanvas = canvasRef.current;
     if (!frameCanvas || !screenCanvas) return;
 
-    const coolCanvas = createKaleidoCanvas(frameCanvas, numSegments);
+    const coolCanvas = createKaleidoCanvas(
+      frameCanvas,
+      numSegments,
+      useSplitSegments
+    );
     screenCanvas.width = coolCanvas.width;
     screenCanvas.height = coolCanvas.height;
 
@@ -45,7 +49,7 @@ export const WebcamCapture = ({ numSegments = 6 }) => {
   );
 };
 
-function createKaleidoCanvas(img, numSegments) {
+function createKaleidoCanvas(img, numSegments, useSplitSegments) {
   const outCanvas = document.createElement("canvas");
   outCanvas.width = img.width;
   outCanvas.height = img.height;
@@ -55,20 +59,23 @@ function createKaleidoCanvas(img, numSegments) {
 
   const halfSideLength = segHeight * Math.tan(Math.PI / numSegments);
   const sideLength = halfSideLength * 2;
-  const spokeLength = Math.sqrt(
-    segHeight * segHeight + halfSideLength * halfSideLength
-  );
 
-  const triCanvas = drawTriangleCanvas(img, sideLength, segHeight);
+  const triCanvas = useSplitSegments
+    ? drawSplitTriangleCanvas(img, sideLength, segHeight)
+    : drawTriangleCanvas(img, sideLength, segHeight);
 
   const ctx = outCanvas.getContext("2d");
   // if half number of segments is an odd number the pointy bits
   // will stick out the sides so need to offset by the long triangle edge
   // otherwise offset by short triangle edge
-  const xOffset = (numSegments / 2) % 2 === 0 ? segHeight : spokeLength;
+  // const spokeLength = Math.sqrt(
+  //   segHeight * segHeight + halfSideLength * halfSideLength
+  // );
+  const xOffset = 600; //(numSegments / 2) % 2 === 0 ? segHeight : spokeLength;
 
   for (let s = 0; s < numSegments; s++) {
-    drawSegment(ctx, triCanvas, s * angle, s % 2 === 0, xOffset);
+    const isFlipped = s % 2 !== 0;
+    drawSegment(ctx, triCanvas, s * angle, isFlipped, xOffset);
   }
 
   return outCanvas;
@@ -76,14 +83,13 @@ function createKaleidoCanvas(img, numSegments) {
 
 function drawTriangleCanvas(img, triW, triH) {
   const outCanvas = document.createElement("canvas");
+  const halfTriWidth = triW / 2;
 
   // added size buffer to avoid gaps between triangles
   const buffer = 2;
 
   outCanvas.width = Math.ceil(triW + buffer);
   outCanvas.height = triH;
-
-  const halfTriWidth = triW / 2;
 
   const ctx = outCanvas.getContext("2d");
   ctx.beginPath();
@@ -95,8 +101,6 @@ function drawTriangleCanvas(img, triW, triH) {
 
   // move image so centerX of webcam is in the centerX of triangle
   const imgX = (img.width - triW) / 2;
-
-  //void ctx.drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);
   ctx.drawImage(
     img,
     imgX,
@@ -108,6 +112,50 @@ function drawTriangleCanvas(img, triW, triH) {
     img.width,
     img.height
   );
+
+  return outCanvas;
+}
+
+function drawSplitTriangleCanvas(img, triW, triH) {
+  const halfCanvas = document.createElement("canvas");
+  const outCanvas = document.createElement("canvas");
+
+  // added size buffer to avoid gaps between triangles
+  const buffer = 2;
+  const halfTriWidth = triW / 2;
+
+  halfCanvas.width = Math.ceil(halfTriWidth + buffer);
+  halfCanvas.height = triH;
+  outCanvas.width = Math.ceil(triW + buffer);
+  outCanvas.height = triH;
+
+  const ctx = halfCanvas.getContext("2d");
+  ctx.beginPath();
+  ctx.save();
+  ctx.moveTo(0, 0);
+  ctx.lineTo(halfTriWidth + buffer, 0);
+  ctx.lineTo(halfTriWidth + buffer, triH);
+  ctx.lineTo(halfTriWidth, triH);
+  ctx.clip();
+  // move image so centerX of webcam is in the centerX of triangle
+  const imgX = (img.width - triW) / 2;
+  ctx.drawImage(
+    img,
+    imgX,
+    0,
+    img.width,
+    img.height,
+    0,
+    0,
+    img.width,
+    img.height
+  );
+  ctx.restore();
+
+  const outCtx = outCanvas.getContext("2d");
+  outCtx.drawImage(halfCanvas, 0, 0);
+  outCtx.scale(-1, 1);
+  outCtx.drawImage(halfCanvas, -(triW + buffer), 0);
 
   return outCanvas;
 }
