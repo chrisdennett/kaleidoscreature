@@ -3,17 +3,19 @@ import "./styles.css";
 import { WebcamCapture } from "./WebcamCapture";
 
 export default function App() {
-  const [imgSrc, setImgSrc] = React.useState(null);
+  const [numSegments, setNumSegments] = React.useState(12);
 
-  const onCapture = (img) => {
-    setImgSrc(img);
-  };
+  const increaseSegments = () => setNumSegments(numSegments + 2);
+  const decreaseSegments = () => setNumSegments(numSegments - 2);
 
   return (
     <div className="App">
-      {imgSrc && <img src={imgSrc} alt={"web cam capture"} />}
-
-      <WebcamCapture onCapture={onCapture} />
+      <div>
+        <button onClick={decreaseSegments}>-</button>
+        <button onClick={increaseSegments}>+</button>
+        {numSegments}
+      </div>
+      <WebcamCapture numSegments={numSegments} />
     </div>
   );
 }
