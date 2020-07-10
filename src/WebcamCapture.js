@@ -24,12 +24,21 @@ export const WebcamCapture = ({ numSegments = 6, useSplitSegments = true }) => {
       numSegments,
       useSplitSegments
     );
-    screenCanvas.width = coolCanvas.width;
-    screenCanvas.height = coolCanvas.height;
+    screenCanvas.width = coolCanvas.width * 1.5;
+    screenCanvas.height = coolCanvas.height * 1.5;
 
     const ctx = screenCanvas.getContext("2d");
 
+    const hOffset = 831;
+    const vOffset = coolCanvas.height / 2;
+
     ctx.drawImage(coolCanvas, 0, 0);
+    ctx.drawImage(coolCanvas, hOffset, vOffset);
+    ctx.drawImage(coolCanvas, -hOffset, vOffset);
+    ctx.drawImage(coolCanvas, hOffset, -vOffset);
+    ctx.drawImage(coolCanvas, -hOffset, -vOffset);
+    ctx.drawImage(coolCanvas, 0, vOffset * 2);
+    ctx.drawImage(coolCanvas, hOffset * 2, 0);
   };
 
   return (
