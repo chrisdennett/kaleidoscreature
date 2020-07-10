@@ -51,14 +51,12 @@ function createKaleidoCanvas(img, numSegments) {
   outCanvas.height = img.height;
 
   const angle = 360 / numSegments;
-  const segHeight = Math.round(videoConstraints.height / 2);
+  const segHeight = videoConstraints.height / 2;
 
-  const halfSideLength = Math.round(
-    segHeight * Math.tan(Math.PI / numSegments)
-  );
+  const halfSideLength = segHeight * Math.tan(Math.PI / numSegments);
   const sideLength = halfSideLength * 2;
-  const spokeLength = Math.round(
-    Math.sqrt(segHeight * segHeight + halfSideLength * halfSideLength)
+  const spokeLength = Math.sqrt(
+    segHeight * segHeight + halfSideLength * halfSideLength
   );
 
   const triCanvas = drawTriangleCanvas(img, sideLength, segHeight);
@@ -78,20 +76,25 @@ function createKaleidoCanvas(img, numSegments) {
 
 function drawTriangleCanvas(img, triW, triH) {
   const outCanvas = document.createElement("canvas");
-  outCanvas.width = triW;
+
+  // added size buffer to avoid gaps between triangles
+  const buffer = 2;
+
+  outCanvas.width = Math.ceil(triW + buffer);
   outCanvas.height = triH;
 
-  const halfTriWidth = Math.round(triW / 2);
+  const halfTriWidth = triW / 2;
 
   const ctx = outCanvas.getContext("2d");
   ctx.beginPath();
   ctx.moveTo(0, 0);
-  ctx.lineTo(triW, 0);
+  ctx.lineTo(triW + buffer, 0);
+  ctx.lineTo(halfTriWidth + buffer, triH);
   ctx.lineTo(halfTriWidth, triH);
   ctx.clip();
 
   // move image so centerX of webcam is in the centerX of triangle
-  const imgX = Math.round((img.width - triW) / 2);
+  const imgX = (img.width - triW) / 2;
 
   //void ctx.drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);
   ctx.drawImage(
@@ -110,8 +113,8 @@ function drawTriangleCanvas(img, triW, triH) {
 }
 
 function drawSegment(ctx, img, rotation, flipped, spokeLength) {
-  const x = Math.round(img.width / 2);
-  const y = img.height - 1; // -1 removed slight gap between wedges
+  const x = img.width / 2;
+  const y = img.height; // -1 removed slight gap between wedges
   let drawX = -x;
   const drawY = -y;
 
