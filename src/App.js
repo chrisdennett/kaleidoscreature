@@ -3,6 +3,7 @@ import "./styles.css";
 import { WebcamCapture } from "./WebcamCapture";
 
 export default function App() {
+  const [showControls, setShowControls] = React.useState(false);
   const [numSegments, setNumSegments] = React.useState(6);
   const [useSplitSegments, setUseSplitSegments] = React.useState(true);
 
@@ -28,16 +29,25 @@ export default function App() {
     setUseSplitSegments(newValue);
   };
 
+  const onCanvasClick = () => {
+    setShowControls(!showControls);
+  };
+
   return (
-    <div className="App">
-      <div style={{ position: "fixed" }}>
-        <button onClick={decreaseSegments}>-</button>
-        <button onClick={increaseSegments}>+</button>
-        {numSegments}
-        <button onClick={toggleUseSplitSegments}>toggle split segments</button>
-        {useSplitSegments ? "True" : "False"}
-      </div>
+    <div>
+      {showControls && (
+        <div style={{ position: "fixed" }}>
+          <button onClick={decreaseSegments}>-</button>
+          <button onClick={increaseSegments}>+</button>
+          {numSegments}
+          <button onClick={toggleUseSplitSegments}>
+            toggle split segments
+          </button>
+          {useSplitSegments ? "True" : "False"}
+        </div>
+      )}
       <WebcamCapture
+        onClick={onCanvasClick}
         numSegments={numSegments}
         useSplitSegments={useSplitSegments}
       />

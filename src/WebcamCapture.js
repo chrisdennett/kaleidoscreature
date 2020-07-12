@@ -23,7 +23,11 @@ const mainPoly = {
   yAdjust: 0,
 };
 
-export const WebcamCapture = ({ numSegments = 6, useSplitSegments = true }) => {
+export const WebcamCapture = ({
+  numSegments = 6,
+  useSplitSegments = true,
+  onClick,
+}) => {
   const canvasRef = React.useRef(null);
   const webcamRef = React.useRef(null);
   useAnimationFrame(() => grabFrame());
@@ -64,7 +68,7 @@ export const WebcamCapture = ({ numSegments = 6, useSplitSegments = true }) => {
   };
 
   return (
-    <div>
+    <div onClick={onClick}>
       <canvas ref={canvasRef} style={{ display: "block" }} />
 
       {/* HIDDEN */}
