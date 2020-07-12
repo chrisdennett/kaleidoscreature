@@ -13,14 +13,11 @@ const canvasSize = {
   h: 960,
 };
 
-// width: 1280,
-// height: 960,
-
 const mainPoly = {
   h: canvasSize.h,
   diam: canvasSize.h / 2,
   xAdjust: 300,
-  yAdjust: 0,
+  yAdjust: 60,
 };
 
 export const WebcamCapture = ({
@@ -38,33 +35,52 @@ export const WebcamCapture = ({
     const screenCanvas = canvasRef.current;
     if (!frameCanvas || !screenCanvas) return;
 
-    const coolCanvas = createKaleidoCanvas(
+    const { canvas: coolCanvas, width: polyWidth } = createKaleidoCanvas(
       frameCanvas,
       numSegments,
       useSplitSegments
     );
-    screenCanvas.width = coolCanvas.width * 1.5;
-    screenCanvas.height = coolCanvas.height * 1.5;
+    screenCanvas.width = 1920;
+    screenCanvas.height = 1080;
 
     const ctx = screenCanvas.getContext("2d");
 
-    const polyHalfWidth = 623;
+    const polyHalfWidth = polyWidth / 2;
     const polyQuarterWidth = polyHalfWidth / 2;
-    const polyWidth = polyHalfWidth * 2;
 
-    const hOffset = polyWidth - polyQuarterWidth;
-    const vOffset = coolCanvas.height / 2;
+    const hOffset = polyWidth - polyQuarterWidth - 1;
+    const vOffset = coolCanvas.height / 2 - 1;
 
     // draw main poly
     ctx.drawImage(coolCanvas, mainPoly.xAdjust, mainPoly.yAdjust);
+    // below
+    ctx.drawImage(coolCanvas, mainPoly.xAdjust, mainPoly.yAdjust + mainPoly.h);
+    // above
+    ctx.drawImage(coolCanvas, mainPoly.xAdjust, mainPoly.yAdjust - mainPoly.h);
     // below right
-    ctx.drawImage(coolCanvas, mainPoly.xAdjust + hOffset, vOffset);
+    ctx.drawImage(
+      coolCanvas,
+      mainPoly.xAdjust + hOffset,
+      mainPoly.yAdjust + vOffset
+    );
     // below left
-    ctx.drawImage(coolCanvas, mainPoly.xAdjust - hOffset, vOffset);
+    ctx.drawImage(
+      coolCanvas,
+      mainPoly.xAdjust - hOffset,
+      mainPoly.yAdjust + vOffset
+    );
     // above right
-    ctx.drawImage(coolCanvas, mainPoly.xAdjust + hOffset, -vOffset);
+    ctx.drawImage(
+      coolCanvas,
+      mainPoly.xAdjust + hOffset,
+      mainPoly.yAdjust - vOffset
+    );
     // above left
-    ctx.drawImage(coolCanvas, mainPoly.xAdjust - hOffset, -vOffset);
+    ctx.drawImage(
+      coolCanvas,
+      mainPoly.xAdjust - hOffset,
+      mainPoly.yAdjust - vOffset
+    );
   };
 
   return (
@@ -108,14 +124,14 @@ function createKaleidoCanvas(img, numSegments, useSplitSegments) {
     segHeight * segHeight + halfSideLength * halfSideLength
   );
   const halfWidth = (numSegments / 2) % 2 === 0 ? segHeight : spokeLength;
-  // const width = halfWidth * 2;
+  const width = halfWidth * 2;
 
   for (let s = 0; s < numSegments; s++) {
     const isFlipped = s % 2 !== 0;
     drawSegment(ctx, triCanvas, s * angle, isFlipped, halfWidth);
   }
 
-  return outCanvas;
+  return { canvas: outCanvas, width };
 }
 
 function drawTriangleCanvas(img, triW, triH) {
