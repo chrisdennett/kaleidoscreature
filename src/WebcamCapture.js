@@ -3,14 +3,14 @@ import Webcam from "react-webcam";
 import { useAnimationFrame } from "./hooks/useAnimationFrame";
 
 const videoConstraints = {
-  width: 1920,
-  height: 1080,
+  width: 1280,
+  height: 960,
   facingMode: "user",
 };
 
 const canvasSize = {
-  w: 1920,
-  h: 1080,
+  w: 1280,
+  h: 960,
 };
 
 // width: 1280,
