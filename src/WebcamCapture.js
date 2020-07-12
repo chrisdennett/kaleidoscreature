@@ -3,9 +3,24 @@ import Webcam from "react-webcam";
 import { useAnimationFrame } from "./hooks/useAnimationFrame";
 
 const videoConstraints = {
-  width: 1280,
-  height: 960,
+  width: 1920,
+  height: 1080,
   facingMode: "user",
+};
+
+const canvasSize = {
+  w: 1920,
+  h: 1080,
+};
+
+// width: 1280,
+// height: 960,
+
+const mainPoly = {
+  h: canvasSize.h,
+  diam: canvasSize.h / 2,
+  xAdjust: 300,
+  yAdjust: 0,
 };
 
 export const WebcamCapture = ({ numSegments = 6, useSplitSegments = true }) => {
@@ -29,22 +44,30 @@ export const WebcamCapture = ({ numSegments = 6, useSplitSegments = true }) => {
 
     const ctx = screenCanvas.getContext("2d");
 
-    const hOffset = 831;
+    const polyHalfWidth = 623;
+    const polyQuarterWidth = polyHalfWidth / 2;
+    const polyWidth = polyHalfWidth * 2;
+
+    const hOffset = polyWidth - polyQuarterWidth;
     const vOffset = coolCanvas.height / 2;
 
-    ctx.drawImage(coolCanvas, 0, 0);
-    ctx.drawImage(coolCanvas, hOffset, vOffset);
-    ctx.drawImage(coolCanvas, -hOffset, vOffset);
-    ctx.drawImage(coolCanvas, hOffset, -vOffset);
-    ctx.drawImage(coolCanvas, -hOffset, -vOffset);
-    ctx.drawImage(coolCanvas, 0, vOffset * 2);
-    ctx.drawImage(coolCanvas, hOffset * 2, 0);
+    // draw main poly
+    ctx.drawImage(coolCanvas, mainPoly.xAdjust, mainPoly.yAdjust);
+    // below right
+    ctx.drawImage(coolCanvas, mainPoly.xAdjust + hOffset, vOffset);
+    // below left
+    ctx.drawImage(coolCanvas, mainPoly.xAdjust - hOffset, vOffset);
+    // above right
+    ctx.drawImage(coolCanvas, mainPoly.xAdjust + hOffset, -vOffset);
+    // above left
+    ctx.drawImage(coolCanvas, mainPoly.xAdjust - hOffset, -vOffset);
   };
 
   return (
     <div>
       <canvas ref={canvasRef} style={{ display: "block" }} />
 
+      {/* HIDDEN */}
       <Webcam
         audio={false}
         width={videoConstraints.width}
@@ -64,7 +87,7 @@ function createKaleidoCanvas(img, numSegments, useSplitSegments) {
   outCanvas.height = img.height;
 
   const angle = 360 / numSegments;
-  const segHeight = videoConstraints.height / 2;
+  const segHeight = mainPoly.diam;
 
   const halfSideLength = segHeight * Math.tan(Math.PI / numSegments);
   const sideLength = halfSideLength * 2;
@@ -77,14 +100,15 @@ function createKaleidoCanvas(img, numSegments, useSplitSegments) {
   // if half number of segments is an odd number the pointy bits
   // will stick out the sides so need to offset by the long triangle edge
   // otherwise offset by short triangle edge
-  // const spokeLength = Math.sqrt(
-  //   segHeight * segHeight + halfSideLength * halfSideLength
-  // );
-  const xOffset = 600; //(numSegments / 2) % 2 === 0 ? segHeight : spokeLength;
+  const spokeLength = Math.sqrt(
+    segHeight * segHeight + halfSideLength * halfSideLength
+  );
+  const halfWidth = (numSegments / 2) % 2 === 0 ? segHeight : spokeLength;
+  // const width = halfWidth * 2;
 
   for (let s = 0; s < numSegments; s++) {
     const isFlipped = s % 2 !== 0;
-    drawSegment(ctx, triCanvas, s * angle, isFlipped, xOffset);
+    drawSegment(ctx, triCanvas, s * angle, isFlipped, halfWidth);
   }
 
   return outCanvas;
@@ -169,14 +193,14 @@ function drawSplitTriangleCanvas(img, triW, triH) {
   return outCanvas;
 }
 
-function drawSegment(ctx, img, rotation, flipped, spokeLength) {
+function drawSegment(ctx, img, rotation, flipped, centerX) {
   const x = img.width / 2;
   const y = img.height; // -1 removed slight gap between wedges
   let drawX = -x;
   const drawY = -y;
 
   ctx.save();
-  ctx.translate(spokeLength, y);
+  ctx.translate(centerX, y);
   ctx.rotate(degToRad(rotation));
   if (flipped) {
     ctx.scale(-1, 1);
