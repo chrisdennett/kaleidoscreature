@@ -5,6 +5,7 @@ import { WebcamCapture } from "./WebcamCapture";
 export default function App() {
   const [showControls, setShowControls] = React.useState(false);
   const [numSegments, setNumSegments] = React.useState(6);
+  const [polyHeight, setPolyHeight] = React.useState(960);
   const [useSplitSegments, setUseSplitSegments] = React.useState(true);
 
   const incr = useSplitSegments ? 1 : 2;
@@ -33,6 +34,10 @@ export default function App() {
     setShowControls(!showControls);
   };
 
+  const onPolyHeightSliderChange = (e) => {
+    setPolyHeight(e.target.value);
+  };
+
   return (
     <div>
       {showControls && (
@@ -44,12 +49,25 @@ export default function App() {
             toggle split segments
           </button>
           {useSplitSegments ? "True" : "False"}
+          <div class="slidecontainer">
+            <input
+              type="range"
+              min="100"
+              max="1000"
+              value={polyHeight}
+              class="slider"
+              id="myRange"
+              onChange={onPolyHeightSliderChange}
+            />
+            {polyHeight}
+          </div>
         </div>
       )}
       <WebcamCapture
         onClick={onCanvasClick}
         numSegments={numSegments}
         useSplitSegments={useSplitSegments}
+        polyHeight={polyHeight}
       />
     </div>
   );

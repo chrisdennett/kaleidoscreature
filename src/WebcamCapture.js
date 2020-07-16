@@ -8,21 +8,18 @@ const videoConstraints = {
   facingMode: "user",
 };
 
-const mainPoly = {
-  h: 960,
-  diam: 960 / 2,
-  xAdjust: 300,
-  yAdjust: 60,
-};
-
 export const WebcamCapture = ({
   numSegments = 6,
+  polyHeight,
   useSplitSegments = true,
   onClick,
 }) => {
   const canvasRef = React.useRef(null);
   const webcamRef = React.useRef(null);
   useAnimationFrame(() => grabFrame());
+
+  // const polyHeight = 960;
+  const polyDiameter = polyHeight / 2;
 
   const grabFrame = () => {
     if (!canvasRef || !webcamRef) return;
@@ -33,7 +30,8 @@ export const WebcamCapture = ({
     const { canvas: kaleidCanvas, width: polyWidth } = createKaleidoCanvas(
       frameCanvas,
       numSegments,
-      useSplitSegments
+      useSplitSegments,
+      polyDiameter
     );
 
     screenCanvas.width = window.innerWidth;
@@ -41,8 +39,8 @@ export const WebcamCapture = ({
 
     const rectCanvas = createTiledKaleidoRect(
       kaleidCanvas,
-      mainPoly,
-      polyWidth
+      polyWidth,
+      polyHeight
     );
 
     // tile
@@ -80,13 +78,13 @@ export const WebcamCapture = ({
   );
 };
 
-function createKaleidoCanvas(img, numSegments, useSplitSegments) {
+function createKaleidoCanvas(img, numSegments, useSplitSegments, polyDiameter) {
   const outCanvas = document.createElement("canvas");
   outCanvas.width = img.width;
   outCanvas.height = img.height;
 
   const angle = 360 / numSegments;
-  const segHeight = mainPoly.diam;
+  const segHeight = polyDiameter;
 
   const halfSideLength = segHeight * Math.tan(Math.PI / numSegments);
   const sideLength = halfSideLength * 2;
@@ -113,16 +111,16 @@ function createKaleidoCanvas(img, numSegments, useSplitSegments) {
   return { canvas: outCanvas, width };
 }
 
-function createTiledKaleidoRect(sourceCanvas, mainPoly, polyWidth) {
+function createTiledKaleidoRect(sourceCanvas, polyWidth, polyHeight) {
   const outCanvas = document.createElement("canvas");
   const overlap = 2;
 
   outCanvas.width = polyWidth * 1.5;
-  outCanvas.height = mainPoly.h;
+  outCanvas.height = polyHeight;
   const ctx = outCanvas.getContext("2d");
 
   const polyHalfWidth = polyWidth / 2;
-  const polyHalfHeight = mainPoly.h / 2;
+  const polyHalfHeight = polyHeight / 2;
   const polyQuarterWidth = polyHalfWidth / 2;
 
   const hOffset = polyHalfWidth - polyQuarterWidth - overlap;
