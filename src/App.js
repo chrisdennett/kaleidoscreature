@@ -5,7 +5,8 @@ import { WebcamCapture } from "./WebcamCapture";
 export default function App() {
   const [showControls, setShowControls] = React.useState(false);
   const [numSegments, setNumSegments] = React.useState(6);
-  const [polyHeight, setPolyHeight] = React.useState(960);
+  const [polyHeight, setPolyHeight] = React.useState(400);
+  // const [polyHeight, setPolyHeight] = React.useState(960);
   const [useSplitSegments, setUseSplitSegments] = React.useState(true);
 
   const incr = useSplitSegments ? 1 : 2;
@@ -54,6 +55,7 @@ export default function App() {
               type="range"
               min="100"
               max="1000"
+              step="2"
               value={polyHeight}
               class="slider"
               id="myRange"

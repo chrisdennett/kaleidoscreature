@@ -18,20 +18,16 @@ export const WebcamCapture = ({
   const webcamRef = React.useRef(null);
   useAnimationFrame(() => grabFrame());
 
-  // const polyHeight = 960;
-  const polyDiameter = polyHeight / 2;
-
   const grabFrame = () => {
     if (!canvasRef || !webcamRef) return;
     const frameCanvas = webcamRef.current.getCanvas();
     const screenCanvas = canvasRef.current;
     if (!frameCanvas || !screenCanvas) return;
 
-    const { canvas: kaleidCanvas, width: polyWidth } = createKaleidoCanvas(
+    const kaleidCanvas = createKaleidoCanvas(
       frameCanvas,
       numSegments,
-      useSplitSegments,
-      polyDiameter
+      useSplitSegments
     );
 
     screenCanvas.width = window.innerWidth;
@@ -39,7 +35,7 @@ export const WebcamCapture = ({
 
     const rectCanvas = createTiledKaleidoRect(
       kaleidCanvas,
-      polyWidth,
+      polyHeight * 1.25,
       polyHeight
     );
 
@@ -78,13 +74,13 @@ export const WebcamCapture = ({
   );
 };
 
-function createKaleidoCanvas(img, numSegments, useSplitSegments, polyDiameter) {
+function createKaleidoCanvas(img, numSegments, useSplitSegments) {
   const outCanvas = document.createElement("canvas");
-  outCanvas.width = img.width;
-  outCanvas.height = img.height;
 
   const angle = 360 / numSegments;
-  const segHeight = polyDiameter;
+  const segHeight = img.height;
+  // const segHeight = polyDiameter;
+  // console.log("segHeight: ", segHeight);
 
   const halfSideLength = segHeight * Math.tan(Math.PI / numSegments);
   const sideLength = halfSideLength * 2;
@@ -103,12 +99,15 @@ function createKaleidoCanvas(img, numSegments, useSplitSegments, polyDiameter) {
   const halfWidth = (numSegments / 2) % 2 === 0 ? segHeight : spokeLength;
   const width = halfWidth * 2;
 
+  outCanvas.width = width;
+  outCanvas.height = segHeight * 2;
+
   for (let s = 0; s < numSegments; s++) {
     const isFlipped = s % 2 !== 0;
     drawSegment(ctx, triCanvas, s * angle, isFlipped, halfWidth);
   }
 
-  return { canvas: outCanvas, width };
+  return outCanvas;
 }
 
 function createTiledKaleidoRect(sourceCanvas, polyWidth, polyHeight) {
@@ -127,17 +126,59 @@ function createTiledKaleidoRect(sourceCanvas, polyWidth, polyHeight) {
   const vOffset = polyHalfHeight - overlap;
 
   // top left
-  ctx.drawImage(sourceCanvas, -polyHalfWidth, -polyHalfHeight);
-  // bottom left
-  ctx.drawImage(sourceCanvas, -polyHalfWidth, polyHalfHeight);
-  // middle
-  ctx.drawImage(sourceCanvas, hOffset, 0);
-  // top right
-  ctx.drawImage(sourceCanvas, polyWidth - overlap, -vOffset);
-  // bottom left
-  ctx.drawImage(sourceCanvas, polyWidth - overlap, vOffset);
+  drawToCanvas(
+    sourceCanvas,
+    ctx,
+    -polyHalfWidth,
+    -polyHalfHeight,
+    polyWidth,
+    polyHeight
+  );
 
+  // bottom left
+  drawToCanvas(
+    sourceCanvas,
+    ctx,
+    -polyHalfWidth,
+    polyHalfHeight,
+    polyWidth,
+    polyHeight
+  );
+  // middle
+  drawToCanvas(sourceCanvas, ctx, hOffset, 0, polyWidth, polyHeight);
+  // top right
+  drawToCanvas(
+    sourceCanvas,
+    ctx,
+    polyWidth - overlap,
+    -vOffset,
+    polyWidth,
+    polyHeight
+  );
+  // bottom left
+  drawToCanvas(
+    sourceCanvas,
+    ctx,
+    polyWidth - overlap,
+    vOffset,
+    polyWidth,
+    polyHeight
+  );
   return outCanvas;
+}
+
+function drawToCanvas(sourceCanvas, ctx, x, y, w, h) {
+  ctx.drawImage(
+    sourceCanvas,
+    0,
+    0,
+    sourceCanvas.width,
+    sourceCanvas.height,
+    x,
+    y,
+    w,
+    h
+  );
 }
 
 function drawTriangleCanvas(img, triW, triH) {
