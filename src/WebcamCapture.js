@@ -9,8 +9,8 @@ const videoConstraints = {
 };
 
 const mainPoly = {
-  h: 600,
-  diam: 300,
+  h: 960,
+  diam: 960 / 2,
   xAdjust: 300,
   yAdjust: 60,
 };
@@ -39,26 +39,27 @@ export const WebcamCapture = ({
     screenCanvas.width = window.innerWidth;
     screenCanvas.height = window.innerHeight;
 
-    const tiledCanvas = createTiledKaleidoCanvas(
+    const rectCanvas = createTiledKaleidoRect(
       kaleidCanvas,
       mainPoly,
-      polyWidth,
-      1920,
-      1080
+      polyWidth
     );
 
+    // tile
     const ctx = screenCanvas.getContext("2d");
-    ctx.drawImage(
-      tiledCanvas,
-      0,
-      0,
-      tiledCanvas.width,
-      tiledCanvas.height,
-      0,
-      0,
-      screenCanvas.width,
-      screenCanvas.height
-    );
+
+    const cols = Math.ceil(window.innerWidth / rectCanvas.width);
+    const rows = Math.ceil(window.innerHeight / rectCanvas.height);
+
+    for (let c = 0; c < cols; c++) {
+      for (let r = 0; r < rows; r++) {
+        ctx.drawImage(
+          rectCanvas,
+          c * rectCanvas.width - 2,
+          r * rectCanvas.height - 2
+        );
+      }
+    }
   };
 
   return (
@@ -112,54 +113,31 @@ function createKaleidoCanvas(img, numSegments, useSplitSegments) {
   return { canvas: outCanvas, width };
 }
 
-function createTiledKaleidoCanvas(
-  sourceCanvas,
-  mainPoly,
-  polyWidth,
-  width,
-  height
-) {
+function createTiledKaleidoRect(sourceCanvas, mainPoly, polyWidth) {
   const outCanvas = document.createElement("canvas");
-  outCanvas.width = width;
-  outCanvas.height = height;
+  const overlap = 2;
+
+  outCanvas.width = polyWidth * 1.5;
+  outCanvas.height = mainPoly.h;
   const ctx = outCanvas.getContext("2d");
 
   const polyHalfWidth = polyWidth / 2;
+  const polyHalfHeight = mainPoly.h / 2;
   const polyQuarterWidth = polyHalfWidth / 2;
 
-  const hOffset = polyWidth - polyQuarterWidth - 1;
-  const vOffset = mainPoly.diam - 1;
+  const hOffset = polyHalfWidth - polyQuarterWidth - overlap;
+  const vOffset = polyHalfHeight - overlap;
 
-  // draw main poly
-  ctx.drawImage(sourceCanvas, mainPoly.xAdjust, mainPoly.yAdjust);
-  // below
-  ctx.drawImage(sourceCanvas, mainPoly.xAdjust, mainPoly.yAdjust + mainPoly.h);
-  // above
-  ctx.drawImage(sourceCanvas, mainPoly.xAdjust, mainPoly.yAdjust - mainPoly.h);
-  // below right
-  ctx.drawImage(
-    sourceCanvas,
-    mainPoly.xAdjust + hOffset,
-    mainPoly.yAdjust + vOffset
-  );
-  // below left
-  ctx.drawImage(
-    sourceCanvas,
-    mainPoly.xAdjust - hOffset,
-    mainPoly.yAdjust + vOffset
-  );
-  // above right
-  ctx.drawImage(
-    sourceCanvas,
-    mainPoly.xAdjust + hOffset,
-    mainPoly.yAdjust - vOffset
-  );
-  // above left
-  ctx.drawImage(
-    sourceCanvas,
-    mainPoly.xAdjust - hOffset,
-    mainPoly.yAdjust - vOffset
-  );
+  // top left
+  ctx.drawImage(sourceCanvas, -polyHalfWidth, -polyHalfHeight);
+  // bottom left
+  ctx.drawImage(sourceCanvas, -polyHalfWidth, polyHalfHeight);
+  // middle
+  ctx.drawImage(sourceCanvas, hOffset, 0);
+  // top right
+  ctx.drawImage(sourceCanvas, polyWidth - overlap, -vOffset);
+  // bottom left
+  ctx.drawImage(sourceCanvas, polyWidth - overlap, vOffset);
 
   return outCanvas;
 }
