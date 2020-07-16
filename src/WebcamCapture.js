@@ -11,6 +11,8 @@ const videoConstraints = {
 export const WebcamCapture = ({
   numSegments = 6,
   polyHeight,
+  yOffset,
+  xOffset,
   useSplitSegments = true,
   onClick,
 }) => {
@@ -33,24 +35,22 @@ export const WebcamCapture = ({
     screenCanvas.width = window.innerWidth;
     screenCanvas.height = window.innerHeight;
 
-    const rectCanvas = createTiledKaleidoRect(
-      kaleidCanvas,
-      polyHeight * 1.25,
-      polyHeight
-    );
+    const rectCanvas = createTiledKaleidoRect(kaleidCanvas, polyHeight);
 
     // tile
-    const ctx = screenCanvas.getContext("2d");
+    const totalHeight = yOffset + window.innerHeight;
+    const totalWidth = xOffset + window.innerWidth;
 
-    const cols = Math.ceil(window.innerWidth / rectCanvas.width);
-    const rows = Math.ceil(window.innerHeight / rectCanvas.height);
+    const ctx = screenCanvas.getContext("2d");
+    const cols = Math.ceil(totalWidth / rectCanvas.width);
+    const rows = Math.ceil(totalHeight / rectCanvas.height);
 
     for (let c = 0; c < cols; c++) {
       for (let r = 0; r < rows; r++) {
         ctx.drawImage(
           rectCanvas,
-          c * rectCanvas.width - 2,
-          r * rectCanvas.height - 2
+          c * rectCanvas.width - 2 - xOffset,
+          r * rectCanvas.height - 2 - yOffset
         );
       }
     }
@@ -110,10 +110,14 @@ function createKaleidoCanvas(img, numSegments, useSplitSegments) {
   return outCanvas;
 }
 
-function createTiledKaleidoRect(sourceCanvas, polyWidth, polyHeight) {
+function createTiledKaleidoRect(sourceCanvas, polyHeight) {
   const outCanvas = document.createElement("canvas");
   const overlap = 2;
 
+  const heightToWidthRatio = sourceCanvas.width / sourceCanvas.height;
+  const polyWidth = polyHeight * heightToWidthRatio;
+
+  // half a poly either side with a quarter overlap
   outCanvas.width = polyWidth * 1.5;
   outCanvas.height = polyHeight;
   const ctx = outCanvas.getContext("2d");

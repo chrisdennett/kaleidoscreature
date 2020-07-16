@@ -1,13 +1,15 @@
-import React from "react";
+import React, { useState } from "react";
 import "./styles.css";
 import { WebcamCapture } from "./WebcamCapture";
+import { useLocalStorage } from "./hooks/useLocalStorage";
 
 export default function App() {
-  const [showControls, setShowControls] = React.useState(false);
-  const [numSegments, setNumSegments] = React.useState(6);
-  const [polyHeight, setPolyHeight] = React.useState(400);
-  // const [polyHeight, setPolyHeight] = React.useState(960);
-  const [useSplitSegments, setUseSplitSegments] = React.useState(true);
+  const [showControls, setShowControls] = useState(false);
+  const [numSegments, setNumSegments] = useState(6);
+  const [polyHeight, setPolyHeight] = useLocalStorage("polyH", 400);
+  const [yOffset, setYOffset] = useLocalStorage("yOffset", 0);
+  const [xOffset, setXOffset] = useLocalStorage("xOffset", 0);
+  const [useSplitSegments, setUseSplitSegments] = useState(true);
 
   const incr = useSplitSegments ? 1 : 2;
 
@@ -39,6 +41,14 @@ export default function App() {
     setPolyHeight(e.target.value);
   };
 
+  const onYOffsetSliderChange = (e) => {
+    setYOffset(parseInt(e.target.value));
+  };
+
+  const onXOffsetSliderChange = (e) => {
+    setXOffset(parseInt(e.target.value));
+  };
+
   return (
     <div>
       {showControls && (
@@ -50,18 +60,38 @@ export default function App() {
             toggle split segments
           </button>
           {useSplitSegments ? "True" : "False"}
-          <div class="slidecontainer">
+          <div>
             <input
               type="range"
               min="100"
               max="1000"
               step="2"
               value={polyHeight}
-              class="slider"
-              id="myRange"
               onChange={onPolyHeightSliderChange}
             />
             {polyHeight}
+          </div>
+          <div>
+            <input
+              type="range"
+              min="0"
+              max={polyHeight * 2}
+              step="1"
+              value={yOffset}
+              onChange={onYOffsetSliderChange}
+            />
+            {yOffset}
+          </div>
+          <div>
+            <input
+              type="range"
+              min="0"
+              max={polyHeight * 2}
+              step="1"
+              value={xOffset}
+              onChange={onXOffsetSliderChange}
+            />
+            {xOffset}
           </div>
         </div>
       )}
@@ -70,6 +100,8 @@ export default function App() {
         numSegments={numSegments}
         useSplitSegments={useSplitSegments}
         polyHeight={polyHeight}
+        yOffset={yOffset}
+        xOffset={xOffset}
       />
     </div>
   );
