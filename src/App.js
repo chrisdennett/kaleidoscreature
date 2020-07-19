@@ -24,6 +24,7 @@ export default function App() {
 
       setPolyHeight(newHeight);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [footPress]);
 
   const onCanvasClick = () => {
