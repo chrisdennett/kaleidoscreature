@@ -18,6 +18,7 @@ export const WebcamCapture = ({
   useSplitSegments = true,
   onClick,
 }) => {
+  const [mediaReady, setMediaReady] = React.useState(false);
   const canvasRef = React.useRef(null);
   const webcamRef = React.useRef(null);
   useAnimationFrame(() => grabFrame());
@@ -60,14 +61,21 @@ export const WebcamCapture = ({
 
   return (
     <div onClick={onClick}>
-      <canvas ref={canvasRef} style={{ display: "block" }} />
+      {!mediaReady && <h1>LOOKING FOR WEBCAM... PLEASE HOLD</h1>}
+
+      {mediaReady && (
+        <canvas
+          ref={canvasRef}
+          style={{ display: "block", border: "10px solid red" }}
+        />
+      )}
 
       {/* HIDDEN */}
       <Webcam
         audio={false}
         width={videoConstraints.width}
-        style={{ position: "fixed", left: -10000 }}
         ref={webcamRef}
+        onUserMedia={() => setMediaReady(true)}
         mirrored={true}
         screenshotFormat="image/jpeg"
         videoConstraints={videoConstraints}

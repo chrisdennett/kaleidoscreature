@@ -1,4 +1,9 @@
+html {
+  background: green;
+}
+
 body {
   margin: 0;
-  overflow: hidden;
+  /* overflow: hidden; */
+  background: red;
 }

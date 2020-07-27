@@ -11,6 +11,7 @@
     "react-scripts": "3.4.1",
     "react-webcam": "^5.2.0"
   },
+  "homepage": "./",
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",

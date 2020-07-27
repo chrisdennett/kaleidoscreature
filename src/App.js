@@ -82,6 +82,7 @@ export default function App() {
           </div>
         </div>
       )}
+
       <WebcamCapture
         onClick={onCanvasClick}
         numSegments={6}
