@@ -63,16 +63,12 @@ export const WebcamCapture = ({
     <div onClick={onClick}>
       {!mediaReady && <h1>LOOKING FOR WEBCAM... PLEASE HOLD</h1>}
 
-      {mediaReady && (
-        <canvas
-          ref={canvasRef}
-          style={{ display: "block", border: "10px solid red" }}
-        />
-      )}
+      {mediaReady && <canvas ref={canvasRef} style={{ display: "block" }} />}
 
       {/* HIDDEN */}
       <Webcam
         audio={false}
+        style={{ position: "fixed", left: -10000 }}
         width={videoConstraints.width}
         ref={webcamRef}
         onUserMedia={() => setMediaReady(true)}
