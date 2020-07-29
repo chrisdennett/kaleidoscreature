@@ -5,8 +5,8 @@ import { drawPolygonCanvas } from "./functions/drawPolygons";
 import { drawTiledHexagonCanvas } from "./functions/drawTiledHexagons";
 
 const videoConstraints = {
-  width: 1280,
-  height: 960,
+  width: 1024,
+  height: 768,
   facingMode: "user",
 };
 
